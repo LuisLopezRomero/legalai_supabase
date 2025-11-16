@@ -19,7 +19,7 @@ const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 
 const EmailListItem: React.FC<{ email: Email; isSelected: boolean; onSelect: () => void; onDelete: (email: Email) => void }> = ({ email, isSelected, onSelect, onDelete }) => {
-  const receivedDate = new Date(email.received_at);
+  const receivedDate = email.received_at ? new Date(email.received_at) : new Date();
   const formattedDate = receivedDate.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -28,23 +28,44 @@ const EmailListItem: React.FC<{ email: Email; isSelected: boolean; onSelect: () 
   return (
     <li
       onClick={onSelect}
-      className={`group p-4 border-b border-brand-border cursor-pointer transition-colors duration-200 flex justify-between items-start gap-2 ${
-        isSelected ? 'bg-brand-primary' : 'hover:bg-gray-700/50'
+      className={`group p-4 border-b cursor-pointer transition-all duration-300 flex justify-between items-start gap-2 relative overflow-hidden ${
+        isSelected 
+          ? 'bg-gradient-to-r from-brand-primary to-brand-primary-hover shadow-lg shadow-brand-primary/20 scale-[1.02]' 
+          : 'hover:scale-[1.01] hover:shadow-md'
       }`}
+      style={!isSelected ? { 
+        borderColor: 'var(--color-border)',
+        backgroundColor: 'transparent'
+      } : {
+        borderColor: 'var(--color-border)'
+      }}
+      onMouseEnter={(e) => {
+        if (!isSelected) {
+          e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isSelected) {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }
+      }}
     >
-      <div className="flex-1 min-w-0">
+      {isSelected && (
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"></div>
+      )}
+      <div className="flex-1 min-w-0 relative z-10">
           <div className="flex justify-between items-center text-sm mb-1">
-            <p className={`font-semibold truncate ${isSelected ? 'text-white' : 'text-brand-text'}`}>{email.sender}</p>
-            <p className={`${isSelected ? 'text-blue-100' : 'text-brand-text-secondary'}`}>{formattedDate}</p>
+            <p className={`font-semibold truncate transition-colors duration-300 ${isSelected ? 'text-white' : 'text-brand-text group-hover:text-brand-primary-light'}`}>{email.sender || 'Sin remitente'}</p>
+            <p className={`text-xs transition-colors duration-300 ${isSelected ? 'text-blue-100' : 'text-brand-text-muted'}`}>{formattedDate}</p>
           </div>
-          <p className={`font-medium truncate ${isSelected ? 'text-white' : 'text-brand-text'}`}>{email.subject}</p>
+          <p className={`font-medium truncate transition-colors duration-300 ${isSelected ? 'text-white' : 'text-brand-text-secondary'}`}>{email.subject || 'Sin asunto'}</p>
       </div>
       <button
         onClick={(e) => {
           e.stopPropagation(); // Evita que se seleccione el email al borrarlo
           onDelete(email);
         }}
-        className="p-2 -mr-2 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-brand-text-secondary hover:bg-red-800/20 hover:text-red-300"
+        className="relative z-10 p-2 -mr-2 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-300 text-brand-text-secondary hover:bg-brand-danger/20 hover:text-brand-danger-light hover:scale-110 hover:rotate-12"
         aria-label={`Borrar email de ${email.sender}`}
         title={`Borrar email de ${email.sender}`}
       >
@@ -79,14 +100,19 @@ const EmailList: React.FC<EmailListProps> = ({ emails, selectedEmailId, onSelect
   
     return (
       <ul className="overflow-y-auto">
-        {emails.map((email) => (
-          <EmailListItem
-            key={email.id}
-            email={email}
-            isSelected={email.id === selectedEmailId}
-            onSelect={() => onSelectEmail(email)}
-            onDelete={onDeleteEmail}
-          />
+        {emails.map((email, index) => (
+          <div 
+            key={email.id} 
+            className="animate-fade-in-up"
+            style={{ animationDelay: `${index * 0.05}s`, animationFillMode: 'both' }}
+          >
+            <EmailListItem
+              email={email}
+              isSelected={email.id === selectedEmailId}
+              onSelect={() => onSelectEmail(email)}
+              onDelete={onDeleteEmail}
+            />
+          </div>
         ))}
       </ul>
     );

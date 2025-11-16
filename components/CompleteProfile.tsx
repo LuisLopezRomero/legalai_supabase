@@ -75,9 +75,19 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ user, onProfileComple
   const isSubmitDisabled = loading || !fullName.trim() || !profession.trim();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-brand-bg p-4">
-      <div className="w-full max-w-md bg-brand-surface rounded-lg shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-center text-brand-text mb-2">Completa tu Perfil</h1>
+    <div className="min-h-screen flex items-center justify-center p-4 animate-fade-in" style={{ background: 'var(--color-bg)' }}>
+      <div className="w-full max-w-md rounded-2xl shadow-2xl p-8 border transition-all duration-500 scale-in-center" style={{ 
+        backgroundColor: 'var(--color-surface)', 
+        borderColor: 'var(--color-border)' 
+      }}>
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-brand-accent to-brand-primary flex items-center justify-center shadow-lg shadow-brand-accent/30">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 text-white">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+          </div>
+        </div>
+        <h1 className="text-2xl font-bold text-center text-brand-text mb-2 gradient-text">Completa tu Perfil</h1>
         <p className="text-center text-brand-text-secondary mb-8">
           ¡Ya casi está! Solo necesitamos un par de datos más para personalizar tu experiencia.
         </p>
@@ -88,7 +98,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ user, onProfileComple
               </label>
               <input
                   id="fullName"
-                  className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-brand-text focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                  className="w-full bg-brand-bg border border-brand-border rounded-lg px-4 py-2.5 text-brand-text focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-300 hover:border-brand-border-light"
                   type="text"
                   placeholder="Ej: Ada Lovelace"
                   value={fullName}
@@ -102,7 +112,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ user, onProfileComple
               </label>
               <input
                   id="profession"
-                  className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-brand-text focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                  className="w-full bg-brand-bg border border-brand-border rounded-lg px-4 py-2.5 text-brand-text focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-300 hover:border-brand-border-light"
                   type="text"
                   placeholder="Ej: Analista de Sistemas"
                   value={profession}
@@ -113,7 +123,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ user, onProfileComple
           <button
             type="submit"
             disabled={isSubmitDisabled}
-            className="w-full flex justify-center items-center gap-2 bg-brand-primary text-white font-semibold py-2 px-4 rounded-md hover:bg-brand-primary-hover transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-brand-primary to-brand-accent text-white font-semibold py-3 px-4 rounded-lg hover:shadow-lg hover:shadow-brand-primary/40 hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {loading ? (
               <>
@@ -126,9 +136,9 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ user, onProfileComple
           </button>
         </form>
         {error && 
-            <p className="mt-4 text-center text-sm text-red-400 bg-red-900/50 p-3 rounded-md">
+            <div className="mt-4 text-center text-sm text-brand-danger-light bg-brand-danger/10 p-3 rounded-lg border border-brand-danger/30 animate-fade-in-up">
                 {error}
-            </p>
+            </div>
         }
       </div>
     </div>

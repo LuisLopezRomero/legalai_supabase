@@ -22,7 +22,10 @@ const MainApp: React.FC<{
   const [currentView, setCurrentView] = useState<'inbox' | 'cases'>('inbox');
 
   return (
-    <div className="flex h-screen font-sans bg-brand-bg text-brand-text">
+    <div className="flex h-screen font-sans" style={{ 
+      backgroundColor: 'var(--color-bg)', 
+      color: 'var(--color-text)' 
+    }}>
       <SidebarNav 
         user={user} 
         currentView={currentView}
@@ -125,8 +128,16 @@ const App: React.FC = () => {
   // 1. Muestra un cargador inicial mientras se verifica la sesión.
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-brand-bg">
-        <p className="text-brand-text-secondary">Cargando sesión...</p>
+      <div className="flex h-screen items-center justify-center" style={{ background: 'var(--color-bg)' }}>
+        <div className="text-center animate-fade-in">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center shadow-lg shadow-brand-primary/30 animate-pulse-subtle">
+            <svg className="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <p className="text-brand-text-secondary">Cargando sesión...</p>
+        </div>
       </div>
     );
   }
@@ -139,8 +150,16 @@ const App: React.FC = () => {
   // 3. Si hay sesión, muestra un cargador mientras se verifica el perfil.
   if (checkingProfile) {
      return (
-      <div className="flex h-screen items-center justify-center bg-brand-bg">
-        <p className="text-brand-text-secondary">Verificando perfil...</p>
+      <div className="flex h-screen items-center justify-center" style={{ background: 'var(--color-bg)' }}>
+        <div className="text-center animate-fade-in">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-brand-accent to-brand-primary flex items-center justify-center shadow-lg shadow-brand-accent/30 animate-pulse-subtle">
+            <svg className="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <p className="text-brand-text-secondary">Verificando perfil...</p>
+        </div>
       </div>
     );
   }
@@ -153,8 +172,16 @@ const App: React.FC = () => {
   // 5. Muestra un cargador final mientras se obtienen los datos principales de la app.
   if (dataLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-brand-bg">
-        <p className="text-brand-text-secondary">Cargando datos de la aplicación...</p>
+      <div className="flex h-screen items-center justify-center" style={{ background: 'var(--color-bg)' }}>
+        <div className="text-center animate-fade-in">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-brand-primary via-brand-accent to-brand-primary-hover flex items-center justify-center shadow-lg shadow-brand-primary/30 animate-pulse-subtle">
+            <svg className="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <p className="text-brand-text-secondary">Cargando datos de la aplicación...</p>
+        </div>
       </div>
     );
   }
@@ -162,7 +189,7 @@ const App: React.FC = () => {
   // 5.1 Si ocurre un error al cargar datos, lo muestra.
   if (dataLoadingError) {
       return (
-          <div className="flex h-screen items-center justify-center bg-brand-bg p-8">
+          <div className="flex h-screen items-center justify-center p-8" style={{ background: 'var(--color-bg)' }}>
               <div className="w-full max-w-2xl bg-brand-surface rounded-lg shadow-lg p-8 text-center">
                   <h1 className="text-2xl font-bold text-red-400 mb-4">Error al Cargar Datos</h1>
                   <p className="text-brand-text-secondary whitespace-pre-wrap">{dataLoadingError}</p>

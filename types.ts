@@ -26,11 +26,11 @@ export interface Case {
 
 export interface Email {
   id: string;
-  user_id: string;
-  subject: string;
-  sender: string;
-  received_at: string;
-  body: string;
+  user_id: string | null; // Puede ser null según tu schema
+  subject: string | null; // Puede ser null según tu schema
+  sender: string | null; // Puede ser null según tu schema
+  received_at: string | null; // Puede ser null según tu schema
+  body: string | null; // Puede ser null según tu schema
   created_at: string;
   updated_at: string;
   expediente_id: string | null;

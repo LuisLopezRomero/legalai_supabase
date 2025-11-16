@@ -153,8 +153,14 @@ const InboxView: React.FC<InboxViewProps> = ({ user, emails, cases, setEmails })
 
   return (
     <div className="flex h-full font-sans">
-      <aside className="w-full md:w-1/3 lg:w-1/4 xl:w-1/5 bg-brand-surface border-r border-brand-border flex flex-col">
-        <header className="p-4 border-b border-brand-border sticky top-0 bg-brand-surface z-10 space-y-3">
+      <aside className="w-full md:w-1/3 lg:w-1/4 xl:w-1/5 border-r flex flex-col" style={{ 
+        backgroundColor: 'var(--color-surface)', 
+        borderColor: 'var(--color-border)' 
+      }}>
+        <header className="p-4 border-b sticky top-0 z-10 space-y-3" style={{ 
+          borderColor: 'var(--color-border)', 
+          backgroundColor: 'var(--color-surface)' 
+        }}>
           <div>
             <h1 className="text-xl font-bold text-brand-text truncate" title={headerTitle}>{headerTitle}</h1>
             <p className="text-sm text-brand-text-secondary">{filteredEmails.length} emails</p>
@@ -199,10 +205,19 @@ const InboxView: React.FC<InboxViewProps> = ({ user, emails, cases, setEmails })
             onFileUpload={handleEmailFileUpload}
             isUploading={isUploading}
             uploadError={uploadError}
+            userId={user.id}
+            onCaseCreated={(newCase) => {
+              // Agregar el nuevo caso a la lista local
+              // Este callback será manejado por el padre si es necesario
+              console.log('Nuevo caso creado:', newCase);
+            }}
           />
         </div>
         {selectedEmail && (
-          <aside className="w-1/3 lg:w-2/5 xl:w-1/3 bg-brand-surface border-l border-brand-border flex flex-col">
+          <aside className="w-1/3 lg:w-2/5 xl:w-1/3 border-l flex flex-col" style={{ 
+            backgroundColor: 'var(--color-surface)', 
+            borderColor: 'var(--color-border)' 
+          }}>
             <AIPanel 
               user={user}
               email={selectedEmail} 
