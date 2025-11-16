@@ -52,8 +52,8 @@ const QuickCaseCreateModal: React.FC<QuickCaseCreateModalProps> = ({
         notas_comentarios: '',
         ubicacion_archivo_fisico: '',
         enlace_documentos_digitales: '',
-        honorarios_pactados: null,
-        facturado_hasta_fecha: null,
+        honorarios_pactados: 0,
+        facturado_hasta_fecha: 0,
       };
       
       setFormData(defaults);
@@ -113,8 +113,8 @@ const QuickCaseCreateModal: React.FC<QuickCaseCreateModalProps> = ({
         notas_comentarios: '',
         ubicacion_archivo_fisico: '',
         enlace_documentos_digitales: '',
-        honorarios_pactados: null,
-        facturado_hasta_fecha: null,
+        honorarios_pactados: 0,
+        facturado_hasta_fecha: 0,
       });
       
       onClose();
@@ -326,6 +326,44 @@ const QuickCaseCreateModal: React.FC<QuickCaseCreateModalProps> = ({
                   }}
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                  Última Actuación
+                </label>
+                <input
+                  name="fecha_ultima_actuacion"
+                  type="date"
+                  value={formData.fecha_ultima_actuacion || ''}
+                  onChange={handleChange}
+                  className="w-full rounded-lg px-3 py-2 transition-all duration-300 focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--color-bg)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text)',
+                  }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                  Fecha de Cierre
+                </label>
+                <input
+                  name="fecha_cierre"
+                  type="date"
+                  value={formData.fecha_cierre || ''}
+                  onChange={handleChange}
+                  className="w-full rounded-lg px-3 py-2 transition-all duration-300 focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--color-bg)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text)',
+                  }}
+                />
+              </div>
             </div>
           </section>
 
@@ -381,6 +419,112 @@ const QuickCaseCreateModal: React.FC<QuickCaseCreateModalProps> = ({
                   name="procurador_asignado"
                   type="text"
                   value={formData.procurador_asignado || ''}
+                  onChange={handleChange}
+                  className="w-full rounded-lg px-3 py-2 transition-all duration-300 focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--color-bg)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text)',
+                  }}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* --- FINANCIERO Y NOTAS --- */}
+          <section>
+            <h3 className="text-md font-semibold border-b pb-2 mb-4" style={{ color: 'var(--color-text)', borderColor: 'var(--color-border)' }}>
+              Financiero y Notas
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                  Honorarios Pactados (€)
+                </label>
+                <input
+                  name="honorarios_pactados"
+                  type="number"
+                  step="0.01"
+                  value={formData.honorarios_pactados ?? ''}
+                  onChange={handleChange}
+                  className="w-full rounded-lg px-3 py-2 transition-all duration-300 focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--color-bg)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text)',
+                  }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                  Facturado hasta la Fecha (€)
+                </label>
+                <input
+                  name="facturado_hasta_fecha"
+                  type="number"
+                  step="0.01"
+                  value={formData.facturado_hasta_fecha ?? ''}
+                  onChange={handleChange}
+                  className="w-full rounded-lg px-3 py-2 transition-all duration-300 focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--color-bg)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text)',
+                  }}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                  Notas / Comentarios
+                </label>
+                <textarea
+                  name="notas_comentarios"
+                  rows={4}
+                  value={formData.notas_comentarios || ''}
+                  onChange={handleChange}
+                  className="w-full rounded-lg px-3 py-2 transition-all duration-300 focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--color-bg)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text)',
+                  }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                  Ubicación Archivo Físico
+                </label>
+                <input
+                  name="ubicacion_archivo_fisico"
+                  type="text"
+                  value={formData.ubicacion_archivo_fisico || ''}
+                  onChange={handleChange}
+                  className="w-full rounded-lg px-3 py-2 transition-all duration-300 focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                  style={{
+                    backgroundColor: 'var(--color-bg)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text)',
+                  }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                  Enlace Documentos Digitales
+                </label>
+                <input
+                  name="enlace_documentos_digitales"
+                  type="url"
+                  value={formData.enlace_documentos_digitales || ''}
                   onChange={handleChange}
                   className="w-full rounded-lg px-3 py-2 transition-all duration-300 focus:ring-2 focus:ring-brand-primary focus:outline-none"
                   style={{
