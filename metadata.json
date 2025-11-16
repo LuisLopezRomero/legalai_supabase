@@ -1,0 +1,5 @@
+{
+  "name": "Luis of Supabase Email Viewer",
+  "description": "A web application to browse and view emails and download their attachments from a Supabase database.",
+  "requestFramePermissions": []
+}
