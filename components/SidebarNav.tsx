@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '../services/supabaseClient';
+import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from './ThemeToggle';
 
 interface SidebarNavProps {
     user: User;
-    currentView: 'inbox' | 'cases';
-    onNavigate: (view: 'inbox' | 'cases') => void;
+    currentView: 'inbox' | 'cases' | 'users';
+    onNavigate: (view: 'inbox' | 'cases' | 'users') => void;
 }
 
 const InboxIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -20,6 +20,12 @@ const BriefcaseIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.02a2.25 2.25 0 0 1-2.25 2.25H6.012A2.25 2.25 0 0 1 3.75 18.17V10.34a2.25 2.25 0 0 1 .882-1.763l6-4.5a2.25 2.25 0 0 1 2.736 0l6 4.5a2.25 2.25 0 0 1 .882 1.763v3.81Z" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 9.75V6.75a2.25 2.25 0 0 0-2.25-2.25h-4.5A2.25 2.25 0 0 0 7.5 6.75v3" />
+    </svg>
+);
+
+const UsersIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
     </svg>
 );
 
@@ -57,9 +63,10 @@ const NavButton: React.FC<{
 
 
 const SidebarNav: React.FC<SidebarNavProps> = ({ user, currentView, onNavigate }) => {
+    const { signOut, isAdmin } = useAuth();
     
     const handleSignOut = async () => {
-        await supabase.auth.signOut();
+        await signOut();
     };
 
     const copyUserId = () => {
@@ -80,6 +87,11 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ user, currentView, onNavigate }
                 <NavButton label="Expedientes" isActive={currentView === 'cases'} onClick={() => onNavigate('cases')}>
                     <BriefcaseIcon className="w-6 h-6" />
                 </NavButton>
+                {isAdmin && (
+                    <NavButton label="Usuarios" isActive={currentView === 'users'} onClick={() => onNavigate('users')}>
+                        <UsersIcon className="w-6 h-6" />
+                    </NavButton>
+                )}
             </nav>
 
             <div className="w-full flex flex-col items-center space-y-2">

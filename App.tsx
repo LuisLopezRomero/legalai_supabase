@@ -7,10 +7,11 @@ import { fetchEmails, fetchCases } from './services/supabaseService';
 import SidebarNav from './components/SidebarNav';
 import InboxView from './components/InboxView';
 import CaseManager from './components/cases/CaseManager';
+import UserManagement from './components/UserManagement';
 import { Email, Case } from './types';
 
 // El componente que contiene la aplicación principal una vez autenticado.
-// Incluye la navegación lateral y el gestor de vistas (Inbox/Expedientes).
+// Incluye la navegación lateral y el gestor de vistas (Inbox/Expedientes/Usuarios).
 const MainApp: React.FC<{ 
   user: User; 
   emails: Email[]; 
@@ -18,7 +19,7 @@ const MainApp: React.FC<{
   setEmails: React.Dispatch<React.SetStateAction<Email[]>>; 
   setCases: React.Dispatch<React.SetStateAction<Case[]>>;
 }> = ({ user, emails, cases, setEmails, setCases }) => {
-  const [currentView, setCurrentView] = useState<'inbox' | 'cases'>('inbox');
+  const [currentView, setCurrentView] = useState<'inbox' | 'cases' | 'users'>('inbox');
 
   return (
     <div className="flex h-screen font-sans" style={{ 
@@ -33,6 +34,7 @@ const MainApp: React.FC<{
       <div className="flex-1 flex flex-col overflow-hidden">
         {currentView === 'inbox' && <InboxView user={user} emails={emails} cases={cases} setEmails={setEmails} />}
         {currentView === 'cases' && <CaseManager user={user} emails={emails} cases={cases} setCases={setCases} />}
+        {currentView === 'users' && <UserManagement />}
       </div>
     </div>
   );

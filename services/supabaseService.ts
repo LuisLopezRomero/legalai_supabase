@@ -121,30 +121,14 @@ export const deletePrompt = async (promptId: string, userId: string): Promise<vo
   }
 };
 
-export const createUserProfile = async (profileData: { id: string; email: string; full_name: string; profession: string; }): Promise<UserProfile> => {
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .insert(profileData)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating user profile:', error);
-    throw error;
-  }
-
-  if (!data) {
-      throw new Error('Failed to create user profile: no data was returned after insert.');
-  }
-
-  return data;
-};
+// OLD FUNCTION REMOVED - replaced by new multi-user version below
+// export const createUserProfile = async (profileData: { id: string; email: string; full_name: string; profession: string; })
 
 export const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
   const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
-    .eq('id', userId)
+    .eq('user_id', userId)  // Changed from 'id' to 'user_id' for multi-user system
     .single();
 
   // "PGRST116" es el código para "0 filas retornadas", lo cual es esperado si el perfil no existe.
@@ -156,26 +140,8 @@ export const fetchUserProfile = async (userId: string): Promise<UserProfile | nu
   return data;
 };
 
-export const updateUserProfile = async (userId: string, profileData: { full_name: string; profession: string; email: string; }): Promise<UserProfile> => {
-  // Usamos 'upsert' para crear el perfil si no existe, o actualizarlo si ya existe.
-  // Esto es crucial para los nuevos usuarios que completan su perfil por primera vez.
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .upsert({ id: userId, ...profileData })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error saving user profile:', error);
-    throw error;
-  }
-
-  if (!data) {
-    throw new Error('Failed to save user profile: no data was returned after upsert.');
-  }
-
-  return data;
-};
+// OLD FUNCTION REMOVED - users are now created by admins with full profiles
+// export const updateUserProfile = async (userId: string, profileData: { full_name: string; profession: string; email: string; })
 
 export const deleteEmail = async (emailId: string): Promise<void> => {
   // Primero, borra los adjuntos asociados al email.
@@ -319,4 +285,108 @@ export const uploadAttachment = async (files: File[], expediente_id: string, ema
         // Relanza el error para que sea capturado por el componente que lo llama.
         throw error;
     }
+};
+
+// --- User Management Functions (Admin only) ---
+
+export const fetchOrganizationUsers = async (organizationId: string): Promise<UserProfile[]> => {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('*')
+    .eq('organization_id', organizationId)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching organization users:', error);
+    throw error;
+  }
+  
+  return data || [];
+};
+
+export const createUserProfile = async (profileData: {
+  user_id: string;
+  organization_id: string;
+  email: string;
+  full_name: string;
+  role: 'admin' | 'member';
+}): Promise<UserProfile> => {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .insert({
+      ...profileData,
+      is_active: true,
+      preferences: {}
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating user profile:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    throw new Error('Failed to create user profile: no data was returned after insert.');
+  }
+  
+  return data;
+};
+
+export const updateUserProfileRole = async (
+  profileId: string, 
+  role: 'admin' | 'member'
+): Promise<UserProfile> => {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .update({ role })
+    .eq('id', profileId)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating user role:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    throw new Error('Failed to update user role: no data was returned after update.');
+  }
+  
+  return data;
+};
+
+export const toggleUserActive = async (
+  profileId: string,
+  isActive: boolean
+): Promise<UserProfile> => {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .update({ is_active: isActive })
+    .eq('id', profileId)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error toggling user active status:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    throw new Error('Failed to toggle user active status: no data was returned after update.');
+  }
+  
+  return data;
+};
+
+export const deleteUserProfile = async (profileId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('user_profiles')
+    .delete()
+    .eq('id', profileId);
+  
+  if (error) {
+    console.error('Error deleting user profile:', error);
+    throw error;
+  }
 };
