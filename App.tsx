@@ -8,10 +8,11 @@ import SidebarNav from './components/SidebarNav';
 import InboxView from './components/InboxView';
 import CaseManager from './components/cases/CaseManager';
 import UserManagement from './components/UserManagement';
+import EmailAssignments from './components/EmailAssignments';
 import { Email, Case } from './types';
 
 // El componente que contiene la aplicación principal una vez autenticado.
-// Incluye la navegación lateral y el gestor de vistas (Inbox/Expedientes/Usuarios).
+// Incluye la navegación lateral y el gestor de vistas (Inbox/Expedientes/Usuarios/Asignaciones).
 const MainApp: React.FC<{ 
   user: User; 
   emails: Email[]; 
@@ -19,7 +20,7 @@ const MainApp: React.FC<{
   setEmails: React.Dispatch<React.SetStateAction<Email[]>>; 
   setCases: React.Dispatch<React.SetStateAction<Case[]>>;
 }> = ({ user, emails, cases, setEmails, setCases }) => {
-  const [currentView, setCurrentView] = useState<'inbox' | 'cases' | 'users'>('inbox');
+  const [currentView, setCurrentView] = useState<'inbox' | 'cases' | 'users' | 'assignments'>('inbox');
 
   return (
     <div className="flex h-screen font-sans" style={{ 
@@ -35,6 +36,7 @@ const MainApp: React.FC<{
         {currentView === 'inbox' && <InboxView user={user} emails={emails} cases={cases} setEmails={setEmails} />}
         {currentView === 'cases' && <CaseManager user={user} emails={emails} cases={cases} setCases={setCases} />}
         {currentView === 'users' && <UserManagement />}
+        {currentView === 'assignments' && <EmailAssignments />}
       </div>
     </div>
   );

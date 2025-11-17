@@ -390,3 +390,76 @@ export const deleteUserProfile = async (profileId: string): Promise<void> => {
     throw error;
   }
 };
+
+// --- Email Assignment Functions (Admin only) ---
+
+export const assignEmailToUser = async (
+  emailId: string,
+  userId: string,
+  assignedByUserId: string
+): Promise<Email> => {
+  const { data, error } = await supabase
+    .from('emails')
+    .update({
+      assigned_to_user_id: userId,
+      assigned_by_user_id: assignedByUserId,
+      assigned_at: new Date().toISOString(),
+    })
+    .eq('id', emailId)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error assigning email to user:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    throw new Error('Failed to assign email: no data returned');
+  }
+  
+  return data;
+};
+
+export const unassignEmail = async (emailId: string): Promise<Email> => {
+  const { data, error } = await supabase
+    .from('emails')
+    .update({
+      assigned_to_user_id: null,
+      assigned_by_user_id: null,
+      assigned_at: null,
+    })
+    .eq('id', emailId)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error unassigning email:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    throw new Error('Failed to unassign email: no data returned');
+  }
+  
+  return data;
+};
+
+export const fetchEmailsWithAssignments = async (organizationId: string) => {
+  const { data, error } = await supabase
+    .from('emails')
+    .select(`
+      *,
+      assigned_to_user:user_profiles!emails_assigned_to_user_id_fkey(id, full_name, email, role),
+      assigned_by_user:user_profiles!emails_assigned_by_user_id_fkey(id, full_name, email)
+    `)
+    .eq('organization_id', organizationId)
+    .order('received_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching emails with assignments:', error);
+    throw error;
+  }
+  
+  return data || [];
+};
