@@ -12,6 +12,7 @@ const LoadingSpinnerIcon: React.FC<{ className?: string }> = ({ className }) => 
 const Auth: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
+    const [isForgotPassword, setIsForgotPassword] = useState(false);
     
     // Form fields
     const [email, setEmail] = useState('');
@@ -50,7 +51,22 @@ const Auth: React.FC = () => {
         setError(null);
         setMessage(null);
 
-        if (isSignUp) {
+        if (isForgotPassword) {
+            // Password reset logic
+            try {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                });
+                if (error) throw error;
+
+                setMessage('¡Correo enviado! Por favor, revisa tu bandeja de entrada para restablecer tu contraseña.');
+                setEmail('');
+            } catch (resetError: any) {
+                setError(resetError.error_description || resetError.message);
+            } finally {
+                setLoading(false);
+            }
+        } else if (isSignUp) {
             try {
                 if (passwordError) {
                     throw new Error(passwordError);
@@ -79,7 +95,7 @@ const Auth: React.FC = () => {
         }
     };
 
-    const isSubmitDisabled = loading || (isSignUp && (!email || !password || !!passwordError));
+    const isSubmitDisabled = loading || (isForgotPassword ? !email : (isSignUp && (!email || !password || !!passwordError)));
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 animate-fade-in" style={{ background: 'var(--color-bg)' }}>
@@ -95,10 +111,13 @@ const Auth: React.FC = () => {
                     </div>
                 </div>
                 <h1 className="text-2xl font-bold text-center text-brand-text mb-2 gradient-text">
-                    {isSignUp ? 'Crear una Cuenta' : 'Iniciar Sesión'}
+                    {isForgotPassword ? 'Recuperar Contraseña' : (isSignUp ? 'Crear una Cuenta' : 'Iniciar Sesión')}
                 </h1>
                 <p className="text-center text-brand-text-secondary mb-8">
-                    {isSignUp ? 'Bienvenido. Ingresa tus datos para registrarte.' : 'Bienvenido de nuevo. Ingresa a tu cuenta.'}
+                    {isForgotPassword 
+                        ? 'Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.' 
+                        : (isSignUp ? 'Bienvenido. Ingresa tus datos para registrarte.' : 'Bienvenido de nuevo. Ingresa a tu cuenta.')
+                    }
                 </p>
                 
                 <form onSubmit={handleAuthAction} className="space-y-4">
@@ -117,22 +136,24 @@ const Auth: React.FC = () => {
                         />
                     </div>
 
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-brand-text-secondary mb-2">
-                            Contraseña
-                        </label>
-                        <input
-                            id="password"
-                            className="w-full bg-brand-bg border border-brand-border rounded-lg px-4 py-2.5 text-brand-text focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-300 hover:border-brand-border-light"
-                            type="password"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
+                    {!isForgotPassword && (
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-brand-text-secondary mb-2">
+                                Contraseña
+                            </label>
+                            <input
+                                id="password"
+                                className="w-full bg-brand-bg border border-brand-border rounded-lg px-4 py-2.5 text-brand-text focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-300 hover:border-brand-border-light"
+                                type="password"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                    )}
 
-                    {isSignUp && (
+                    {isSignUp && !isForgotPassword && (
                          <div>
                             <label htmlFor="repeat-password" className="block text-sm font-medium text-brand-text-secondary mb-2">
                                 Repetir Contraseña
@@ -162,7 +183,7 @@ const Auth: React.FC = () => {
                                 Procesando...
                             </>
                         ) : (
-                            isSignUp ? 'Registrarse' : 'Iniciar Sesión'
+                            isForgotPassword ? 'Enviar Enlace de Recuperación' : (isSignUp ? 'Registrarse' : 'Iniciar Sesión')
                         )}
                     </button>
                 </form>
@@ -170,17 +191,38 @@ const Auth: React.FC = () => {
                 {error && <div className="mt-4 text-center text-sm text-brand-danger-light bg-brand-danger/10 p-3 rounded-lg border border-brand-danger/30 animate-fade-in-up">{error}</div>}
                 {message && <div className="mt-4 text-center text-sm text-brand-success-light bg-brand-success/10 p-3 rounded-lg border border-brand-success/30 animate-fade-in-up">{message}</div>}
 
-                <div className="mt-6 text-center">
+                <div className="mt-6 text-center space-y-3">
+                    {!isForgotPassword && !isSignUp && (
+                        <button
+                            onClick={() => {
+                                setIsForgotPassword(true);
+                                setError(null);
+                                setMessage(null);
+                                setPasswordError(null);
+                            }}
+                            className="block w-full text-sm text-brand-text-secondary hover:text-brand-primary hover:underline transition-colors duration-300"
+                        >
+                            ¿Olvidaste tu contraseña?
+                        </button>
+                    )}
+                    
                     <button
                         onClick={() => {
-                            setIsSignUp(!isSignUp);
+                            if (isForgotPassword) {
+                                setIsForgotPassword(false);
+                            } else {
+                                setIsSignUp(!isSignUp);
+                            }
                             setError(null);
                             setMessage(null);
                             setPasswordError(null);
                         }}
                         className="text-sm text-brand-primary hover:text-brand-primary-light hover:underline transition-colors duration-300"
                     >
-                        {isSignUp ? '¿Ya tienes una cuenta? Inicia Sesión' : '¿No tienes una cuenta? Regístrate'}
+                        {isForgotPassword 
+                            ? 'Volver al inicio de sesión' 
+                            : (isSignUp ? '¿Ya tienes una cuenta? Inicia Sesión' : '¿No tienes una cuenta? Regístrate')
+                        }
                     </button>
                 </div>
             </div>
