@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Case, Email } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
 import { createCase, updateCase } from '../../services/supabaseService';
 import CaseList from './CaseList';
 import CaseDetail from './CaseDetail';
@@ -15,6 +16,7 @@ interface CaseManagerProps {
 }
 
 const CaseManager: React.FC<CaseManagerProps> = ({ user, emails, cases, setCases }) => {
+    const { organization } = useAuth();
     const [selectedCase, setSelectedCase] = useState<Case | null>(null);
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [formMode, setFormMode] = useState<'new' | 'edit'>('new');
@@ -34,10 +36,15 @@ const CaseManager: React.FC<CaseManagerProps> = ({ user, emails, cases, setCases
         setIsFormModalOpen(true);
     };
 
-    const handleSaveCase = async (caseData: Omit<Case, 'id' | 'user_id' | 'created_at'>) => {
+    const handleSaveCase = async (caseData: Omit<Case, 'id' | 'created_at' | 'updated_at'>) => {
+        if (!organization) {
+            console.error('No organization available');
+            return;
+        }
+        
         try {
             if (formMode === 'new') {
-                const newCase = await createCase(caseData, user.id);
+                const newCase = await createCase(caseData, organization.id, user.id);
                 setCases(prevCases => [newCase, ...prevCases]);
                 setSelectedCase(newCase);
             } else if (selectedCase) {

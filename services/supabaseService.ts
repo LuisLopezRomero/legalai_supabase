@@ -3,12 +3,24 @@ import { supabase } from './supabaseClient';
 import { Email, Attachment, Prompt, UserProfile, Case } from '../types';
 import { BUCKET_NAME, FILE_UPLOAD_WEBHOOK_URL } from '../constants';
 
-export const fetchEmails = async (userId: string): Promise<Email[]> => {
-  const { data, error } = await supabase
+// DEPRECATED: Old single-user version
+// export const fetchEmails = async (userId: string): Promise<Email[]> => { ... }
+
+export const fetchEmails = async (organizationId: string, userId: string, isAdmin: boolean): Promise<Email[]> => {
+  let query = supabase
     .from('emails')
     .select('*')
-    .eq('user_id', userId)
-    .order('received_at', { ascending: false });
+    .eq('organization_id', organizationId);
+  
+  // Members only see emails assigned to them
+  if (!isAdmin) {
+    query = query.eq('assigned_to_user_id', userId);
+  }
+  
+  // All users see emails ordered by received date
+  query = query.order('received_at', { ascending: false });
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching emails:', error);
@@ -170,12 +182,38 @@ export const deleteEmail = async (emailId: string): Promise<void> => {
 
 // --- Case Management Functions ---
 
-export const fetchCases = async (userId: string): Promise<Case[]> => {
-  const { data, error } = await supabase
+// DEPRECATED: Old single-user version
+// export const fetchCases = async (userId: string): Promise<Case[]> => { ... }
+
+export const fetchCases = async (organizationId: string, userId: string, isAdmin: boolean): Promise<Case[]> => {
+  let query = supabase
     .from('expedientes')
     .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .eq('organization_id', organizationId);
+  
+  // Members only see cases they created or are assigned to
+  if (!isAdmin) {
+    // Get expedientes where user is assigned
+    const { data: assignments } = await supabase
+      .from('expediente_assignments')
+      .select('expediente_id')
+      .eq('assigned_to_user_id', userId);
+    
+    const assignedExpedienteIds = assignments?.map(a => a.expediente_id) || [];
+    
+    // Build OR filter: created by user OR assigned to user
+    if (assignedExpedienteIds.length > 0) {
+      // Has assignments: show created OR assigned
+      query = query.or(`created_by_user_id.eq.${userId},id.in.(${assignedExpedienteIds.join(',')})`);
+    } else {
+      // No assignments: only show created by user
+      query = query.eq('created_by_user_id', userId);
+    }
+  }
+  
+  query = query.order('created_at', { ascending: false });
+
+  const { data, error } = await query;
   
   if (error) {
     console.error('Error fetching cases:', error);
@@ -184,10 +222,19 @@ export const fetchCases = async (userId: string): Promise<Case[]> => {
   return data || [];
 };
 
-export const createCase = async (caseData: Omit<Case, 'id' | 'user_id' | 'created_at'>, userId: string): Promise<Case> => {
+// Updated for multi-user system
+export const createCase = async (
+  caseData: Omit<Case, 'id' | 'created_at' | 'updated_at'>, 
+  organizationId: string,
+  userId: string
+): Promise<Case> => {
   const { data, error } = await supabase
     .from('expedientes')
-    .insert({ ...caseData, user_id: userId })
+    .insert({ 
+      ...caseData, 
+      organization_id: organizationId,
+      created_by_user_id: userId 
+    })
     .select()
     .single();
   if (error) throw error;

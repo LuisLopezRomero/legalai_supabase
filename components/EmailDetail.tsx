@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Email, Attachment, Case } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 import AttachmentItem from './shared/AttachmentItem';
 import SmartCaseAssignment from './SmartCaseAssignment';
 import QuickCaseCreateModal from './cases/QuickCaseCreateModal';
@@ -30,6 +31,7 @@ const LoadingSpinnerIcon: React.FC<{ className?: string }> = ({ className }) => 
 );
 
 const EmailDetail: React.FC<EmailDetailProps> = ({ email, attachments, isLoading, error, cases, onAssignCase, onFileUpload, isUploading, uploadError, userId, onCaseCreated }) => {
+  const { organization } = useAuth();
   const [isCreateCaseModalOpen, setIsCreateCaseModalOpen] = useState(false);
   if (error) {
     return (
@@ -67,8 +69,13 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email, attachments, isLoading
   };
 
   const handleCreateCase = async (caseData: any) => {
+    if (!organization) {
+      console.error('No organization available');
+      return;
+    }
+    
     const { createCase } = await import('../services/supabaseService');
-    const newCase = await createCase(caseData, userId);
+    const newCase = await createCase(caseData, organization.id, userId);
     
     // Auto-assign the new case to the email
     onAssignCase(email!.id, newCase.id);

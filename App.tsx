@@ -54,6 +54,7 @@ const App: React.FC = () => {
   
   // Carga los datos principales de la aplicación (correos y expedientes) una vez que
   // el usuario está autenticado y tiene perfil y organización.
+  // Filtra según el rol: Admins ven todo, Members solo lo asignado a ellos.
   useEffect(() => {
     if (user && userProfile && organization) {
       const loadAppData = async () => {
@@ -61,8 +62,8 @@ const App: React.FC = () => {
         setDataLoadingError(null);
         try {
           const [fetchedEmails, fetchedCases] = await Promise.all([
-            fetchEmails(user.id),
-            fetchCases(user.id),
+            fetchEmails(organization.id, user.id, isAdmin),
+            fetchCases(organization.id, user.id, isAdmin),
           ]);
           setEmails(fetchedEmails);
           setCases(fetchedCases);
@@ -79,7 +80,7 @@ const App: React.FC = () => {
       };
       loadAppData();
     }
-  }, [user, userProfile, organization]);
+  }, [user, userProfile, organization, isAdmin]);
 
   // 1. Muestra un cargador inicial mientras se verifica la autenticación.
   if (authLoading) {
