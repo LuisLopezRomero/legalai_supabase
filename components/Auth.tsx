@@ -82,9 +82,19 @@ const Auth: React.FC = () => {
     const isSubmitDisabled = loading || (isSignUp && (!email || !password || !!passwordError));
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-brand-bg p-4">
-            <div className="w-full max-w-md bg-brand-surface rounded-lg shadow-lg p-8">
-                <h1 className="text-2xl font-bold text-center text-brand-text mb-2">
+        <div className="min-h-screen flex items-center justify-center p-4 animate-fade-in" style={{ background: 'var(--color-bg)' }}>
+            <div className="w-full max-w-md rounded-2xl shadow-2xl p-8 border transition-all duration-500 scale-in-center" style={{ 
+                backgroundColor: 'var(--color-surface)', 
+                borderColor: 'var(--color-border)' 
+            }}>
+                <div className="text-center mb-6">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center shadow-lg shadow-brand-primary/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 text-white">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                    </div>
+                </div>
+                <h1 className="text-2xl font-bold text-center text-brand-text mb-2 gradient-text">
                     {isSignUp ? 'Crear una Cuenta' : 'Iniciar Sesión'}
                 </h1>
                 <p className="text-center text-brand-text-secondary mb-8">
@@ -98,7 +108,7 @@ const Auth: React.FC = () => {
                         </label>
                         <input
                             id="email"
-                            className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-brand-text focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                            className="w-full bg-brand-bg border border-brand-border rounded-lg px-4 py-2.5 text-brand-text focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-300 hover:border-brand-border-light"
                             type="email"
                             placeholder="tu@email.com"
                             value={email}
@@ -113,7 +123,7 @@ const Auth: React.FC = () => {
                         </label>
                         <input
                             id="password"
-                            className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-brand-text focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                            className="w-full bg-brand-bg border border-brand-border rounded-lg px-4 py-2.5 text-brand-text focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-300 hover:border-brand-border-light"
                             type="password"
                             placeholder="••••••••"
                             value={password}
@@ -129,7 +139,7 @@ const Auth: React.FC = () => {
                             </label>
                             <input
                                 id="repeat-password"
-                                className="w-full bg-brand-bg border border-brand-border rounded-md px-3 py-2 text-brand-text focus:ring-2 focus:ring-brand-primary focus:outline-none"
+                                className="w-full bg-brand-bg border border-brand-border rounded-lg px-4 py-2.5 text-brand-text focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-300 hover:border-brand-border-light"
                                 type="password"
                                 placeholder="••••••••"
                                 value={repeatPassword}
@@ -144,7 +154,7 @@ const Auth: React.FC = () => {
                     <button
                         type="submit"
                         disabled={isSubmitDisabled}
-                        className="w-full flex justify-center items-center gap-2 bg-brand-primary text-white font-semibold py-2 px-4 rounded-md hover:bg-brand-primary-hover transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-brand-primary to-brand-primary-hover text-white font-semibold py-3 px-4 rounded-lg hover:shadow-lg hover:shadow-brand-primary/40 hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                         {loading ? (
                             <>
@@ -157,8 +167,8 @@ const Auth: React.FC = () => {
                     </button>
                 </form>
 
-                {error && <p className="mt-4 text-center text-sm text-red-400 bg-red-900/50 p-3 rounded-md">{error}</p>}
-                {message && <p className="mt-4 text-center text-sm text-green-300 bg-green-900/50 p-3 rounded-md">{message}</p>}
+                {error && <div className="mt-4 text-center text-sm text-brand-danger-light bg-brand-danger/10 p-3 rounded-lg border border-brand-danger/30 animate-fade-in-up">{error}</div>}
+                {message && <div className="mt-4 text-center text-sm text-brand-success-light bg-brand-success/10 p-3 rounded-lg border border-brand-success/30 animate-fade-in-up">{message}</div>}
 
                 <div className="mt-6 text-center">
                     <button
@@ -168,7 +178,7 @@ const Auth: React.FC = () => {
                             setMessage(null);
                             setPasswordError(null);
                         }}
-                        className="text-sm text-brand-primary hover:underline"
+                        className="text-sm text-brand-primary hover:text-brand-primary-light hover:underline transition-colors duration-300"
                     >
                         {isSignUp ? '¿Ya tienes una cuenta? Inicia Sesión' : '¿No tienes una cuenta? Regístrate'}
                     </button>

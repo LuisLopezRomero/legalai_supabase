@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Email, Attachment, Case } from '../types';
 import AttachmentItem from './shared/AttachmentItem';
+import SmartCaseAssignment from './SmartCaseAssignment';
+import QuickCaseCreateModal from './cases/QuickCaseCreateModal';
 
 interface EmailDetailProps {
   email: Email | null;
@@ -13,14 +15,9 @@ interface EmailDetailProps {
   onFileUpload: (files: FileList) => void;
   isUploading: boolean;
   uploadError: string | null;
+  userId: string;
+  onCaseCreated?: (newCase: Case) => void;
 }
-
-const BriefcaseIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.02a2.25 2.25 0 0 1-2.25 2.25H6.012A2.25 2.25 0 0 1 3.75 18.17V10.34a2.25 2.25 0 0 1 .882-1.763l6-4.5a2.25 2.25 0 0 1 2.736 0l6 4.5a2.25 2.25 0 0 1 .882 1.763v3.81Z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 9.75V6.75a2.25 2.25 0 0 0-2.25-2.25h-4.5A2.25 2.25 0 0 0 7.5 6.75v3" />
-    </svg>
-);
 
 const UploadIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
@@ -32,39 +29,8 @@ const LoadingSpinnerIcon: React.FC<{ className?: string }> = ({ className }) => 
     <svg className={`animate-spin ${className || "h-5 w-5"}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
 );
 
-
-const AssignCaseControl: React.FC<{email: Email; cases: Case[]; onAssignCase: (emailId: string, caseId: string | null) => void;}> = ({ email, cases, onAssignCase }) => {
-    
-    const assignedCase = cases.find(c => c.id === email.expediente_id);
-
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-        const caseId = value === 'none' ? null : value;
-        onAssignCase(email.id, caseId);
-    };
-
-    return (
-        <div className="flex items-center gap-2 bg-brand-bg/50 p-2 rounded-md border border-brand-border">
-            <BriefcaseIcon className="w-5 h-5 text-brand-text-secondary"/>
-            <label htmlFor="case-assignment" className="text-sm font-medium text-brand-text-secondary">Expediente:</label>
-            <select
-                id="case-assignment"
-                value={email.expediente_id || 'none'}
-                onChange={handleChange}
-                className="bg-brand-surface border border-brand-border rounded-md px-2 py-1 text-sm text-brand-text focus:ring-1 focus:ring-brand-primary focus:outline-none"
-            >
-                <option value="none">-- Sin Asignar --</option>
-                {cases.map(c => (
-                    <option key={c.id} value={c.id}>
-                       {c.numero_expediente ? `[${c.numero_expediente}]` : ''} {c.titulo_asunto}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
-};
-
-const EmailDetail: React.FC<EmailDetailProps> = ({ email, attachments, isLoading, error, cases, onAssignCase, onFileUpload, isUploading, uploadError }) => {
+const EmailDetail: React.FC<EmailDetailProps> = ({ email, attachments, isLoading, error, cases, onAssignCase, onFileUpload, isUploading, uploadError, userId, onCaseCreated }) => {
+  const [isCreateCaseModalOpen, setIsCreateCaseModalOpen] = useState(false);
   if (error) {
     return (
       <div className="flex items-center justify-center h-full p-8">
@@ -78,10 +44,15 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email, attachments, isLoading
   
   if (!email) {
     return (
-      <div className="flex items-center justify-center h-full p-8">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-brand-text">Select an Email</h2>
-          <p className="text-brand-text-secondary mt-2">Choose an email from the list to view its contents.</p>
+      <div className="flex items-center justify-center h-full p-8 animate-fade-in">
+        <div className="text-center scale-in-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-surface flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-brand-text-muted">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-brand-text">Selecciona un Email</h2>
+          <p className="text-brand-text-secondary mt-2">Elige un correo de la lista para ver su contenido</p>
         </div>
       </div>
     );
@@ -95,34 +66,52 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email, attachments, isLoading
     }
   };
 
+  const handleCreateCase = async (caseData: any) => {
+    const { createCase } = await import('../services/supabaseService');
+    const newCase = await createCase(caseData, userId);
+    
+    // Auto-assign the new case to the email
+    onAssignCase(email!.id, newCase.id);
+    
+    // Notify parent component
+    if (onCaseCreated) {
+      onCaseCreated(newCase);
+    }
+  };
+
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 md:p-8">
-      <header className="pb-4 border-b border-brand-border">
+    <div className="flex-1 overflow-y-auto p-6 md:p-8 animate-fade-in">
+      <header className="pb-4 border-b border-brand-border animate-fade-in-up">
         <div className="flex justify-between items-start gap-4">
             <div className="flex-1 min-w-0">
-                <h2 className="text-2xl font-bold text-brand-text mb-2 break-words">{email.subject}</h2>
+                <h2 className="text-2xl font-bold text-brand-text mb-2 break-words gradient-text">{email.subject || 'Sin asunto'}</h2>
                 <div className="flex items-center space-x-2 text-brand-text-secondary">
-                  <p className="font-semibold text-brand-text">{email.sender}</p>
+                  <p className="font-semibold text-brand-text">{email.sender || 'Sin remitente'}</p>
                   <span>&bull;</span>
-                  <p>{new Date(email.received_at).toLocaleString()}</p>
+                  <p>{email.received_at ? new Date(email.received_at).toLocaleString() : 'Fecha desconocida'}</p>
                 </div>
             </div>
         </div>
         <div className="mt-4">
-            <AssignCaseControl email={email} cases={cases} onAssignCase={onAssignCase} />
+            <SmartCaseAssignment 
+              email={email} 
+              cases={cases} 
+              onAssignCase={onAssignCase}
+              onCreateNewCase={() => setIsCreateCaseModalOpen(true)}
+            />
         </div>
       </header>
 
       <article className="prose prose-invert max-w-none mt-6 text-brand-text whitespace-pre-wrap">
-        {email.body}
+        {email.body || 'Sin contenido'}
       </article>
       
       <section className="mt-8 pt-6 border-t border-brand-border">
         <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">{attachments.length} Attachment{attachments.length > 1 ? 's' : ''}</h3>
             {email.expediente_id && (
-                <label htmlFor="email-attachment-upload" className={`flex items-center gap-2 cursor-pointer bg-brand-primary text-white font-semibold py-1 px-3 rounded-md hover:bg-brand-primary-hover transition-colors text-sm ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                <label htmlFor="email-attachment-upload" className={`flex items-center gap-2 cursor-pointer bg-gradient-to-r from-brand-primary to-brand-primary-hover text-white font-semibold py-2 px-4 rounded-lg hover:shadow-lg hover:shadow-brand-primary/30 hover:scale-105 transition-all duration-300 text-sm ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                     <UploadIcon className="w-4 h-4" />
                     Añadir
                 </label>
@@ -141,6 +130,14 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email, attachments, isLoading
             </div>
         )}
       </section>
+
+      {/* Modal para crear nuevo expediente */}
+      <QuickCaseCreateModal
+        isOpen={isCreateCaseModalOpen}
+        onClose={() => setIsCreateCaseModalOpen(false)}
+        onCreateCase={handleCreateCase}
+        email={email || undefined}
+      />
     </div>
   );
 };

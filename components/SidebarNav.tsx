@@ -2,6 +2,7 @@
 import React from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabaseClient';
+import ThemeToggle from './ThemeToggle';
 
 interface SidebarNavProps {
     user: User;
@@ -38,11 +39,18 @@ const NavButton: React.FC<{
     <button
         onClick={onClick}
         title={label}
-        className={`w-full flex flex-col items-center justify-center p-3 rounded-lg transition-colors duration-200 group ${
-            isActive ? 'bg-brand-primary text-white' : 'text-brand-text-secondary hover:bg-brand-surface hover:text-brand-text'
+        className={`w-full flex flex-col items-center justify-center p-3 rounded-lg transition-all duration-300 group relative overflow-hidden ${
+            isActive 
+                ? 'bg-gradient-to-br from-brand-primary to-brand-primary-hover text-white shadow-lg shadow-brand-primary/30' 
+                : 'text-brand-text-secondary hover:bg-brand-surface-hover hover:text-brand-text hover:scale-105'
         }`}
     >
-        {children}
+        {isActive && (
+            <span className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+        )}
+        <span className={`transition-transform duration-300 ${isActive ? '' : 'group-hover:scale-110'}`}>
+            {children}
+        </span>
         <span className="text-xs mt-1 font-medium">{label}</span>
     </button>
 );
@@ -61,7 +69,10 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ user, currentView, onNavigate }
     }
 
     return (
-        <aside className="w-24 bg-brand-bg border-r border-brand-border flex flex-col items-center justify-between p-2">
+        <aside className="w-24 border-r flex flex-col items-center justify-between p-2 animate-fade-in" style={{ 
+            backgroundColor: 'var(--color-bg)', 
+            borderColor: 'var(--color-border)' 
+        }}>
             <nav className="w-full space-y-2">
                 <NavButton label="Inbox" isActive={currentView === 'inbox'} onClick={() => onNavigate('inbox')}>
                     <InboxIcon className="w-6 h-6" />
@@ -73,19 +84,23 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ user, currentView, onNavigate }
 
             <div className="w-full flex flex-col items-center space-y-2">
                 <div 
-                    className="w-10 h-10 rounded-full bg-brand-primary flex items-center justify-center text-white font-bold text-lg" 
+                    className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center text-white font-bold text-lg cursor-pointer hover:scale-110 hover:shadow-lg hover:shadow-brand-primary/50 transition-all duration-300 hover-glow" 
                     title={`Usuario: ${user.email}\nID: ${user.id}\n(Click para copiar ID)`}
                     onClick={copyUserId}
-                    style={{ cursor: 'pointer' }}
                 >
                     {user.email ? user.email.charAt(0).toUpperCase() : '?'}
                 </div>
-                 <button
+                
+                <ThemeToggle />
+                
+                <button
                     onClick={handleSignOut}
                     title="Cerrar Sesión"
-                    className="w-full flex flex-col items-center justify-center p-3 rounded-lg transition-colors duration-200 text-brand-text-secondary hover:bg-red-800/20 hover:text-red-300"
+                    className="w-full flex flex-col items-center justify-center p-3 rounded-lg transition-all duration-300 text-brand-text-secondary hover:bg-brand-danger/10 hover:text-brand-danger-light hover:scale-105 group"
                 >
-                    <SignOutIcon className="w-6 h-6" />
+                    <span className="transition-transform duration-300 group-hover:scale-110">
+                        <SignOutIcon className="w-6 h-6" />
+                    </span>
                     <span className="text-xs mt-1 font-medium">Salir</span>
                 </button>
             </div>
