@@ -72,7 +72,19 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({ isOpen, onClose, onSu
       onClose();
     } catch (err: any) {
       console.error('Error inviting user:', err);
-      setError(err.message || 'Error al invitar usuario');
+      let errorMessage = 'Error al invitar usuario';
+      
+      if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      if (err.code === '23505') {
+        errorMessage = 'Este email ya está registrado en el sistema';
+      } else if (err.message?.includes('policy')) {
+        errorMessage = 'Error de permisos. Asegúrate de tener RLS configurado correctamente.';
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
