@@ -351,6 +351,33 @@ export const fetchOrganizationUsers = async (organizationId: string): Promise<Us
   return data || [];
 };
 
+// Invite user using Edge Function (RECOMMENDED - uses service_role permissions)
+export const inviteUserViaEdgeFunction = async (
+  email: string,
+  fullName: string,
+  role: 'admin' | 'member'
+): Promise<{ success: boolean; message: string; user?: any }> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('invite-user', {
+      body: {
+        email,
+        fullName,
+        role,
+      },
+    });
+
+    if (error) {
+      console.error('Error invoking invite-user function:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error: any) {
+    console.error('Error in inviteUserViaEdgeFunction:', error);
+    throw new Error(error.message || 'Failed to invite user');
+  }
+};
+
 export const createUserProfile = async (profileData: {
   user_id: string;
   organization_id: string;

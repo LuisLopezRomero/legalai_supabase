@@ -3,7 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { UserProfile } from '../types';
 import { 
   fetchOrganizationUsers, 
-  createUserProfile, 
+  createUserProfile,
+  inviteUserViaEdgeFunction,
   updateUserProfileRole,
   toggleUserActive,
   deleteUserProfile
@@ -30,44 +31,18 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({ isOpen, onClose, onSu
     setError(null);
 
     try {
-      // NOTE: In production, this should use Supabase Edge Functions or a backend API
-      // that has service_role permissions to call auth.admin.inviteUserByEmail()
-      // 
-      // For now, we'll use signUp which creates a user account that needs email confirmation
-      // The user will receive an email to set their password
+      // Use Edge Function to invite user (PRODUCTION-READY SOLUTION)
+      const result = await inviteUserViaEdgeFunction(email, fullName, role);
       
-      // Step 1: Create Supabase Auth user (requires email confirmation)
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password: Math.random().toString(36).slice(-12) + 'Aa1!', // Temporary random password
-        options: {
-          data: {
-            full_name: fullName,
-          },
-          emailRedirectTo: `${window.location.origin}/`,
-        }
-      });
-      
-      if (authError) throw authError;
-      
-      if (!authData.user) {
-        throw new Error('No se pudo crear el usuario de autenticación');
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to invite user');
       }
-
-      // Step 2: Create user profile
-      await createUserProfile({
-        user_id: authData.user.id,
-        organization_id: organizationId,
-        email,
-        full_name: fullName,
-        role,
-      });
 
       // Success!
       setEmail('');
       setFullName('');
       setRole('member');
-      alert(`Usuario ${fullName} creado exitosamente. Se ha enviado un email de confirmación a ${email} para que establezca su contraseña.`);
+      alert(`✅ Usuario ${fullName} creado exitosamente!\n\nSe ha enviado un email de invitación a ${email} para que configure su contraseña.`);
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -78,10 +53,17 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({ isOpen, onClose, onSu
         errorMessage = err.message;
       }
       
-      if (err.code === '23505') {
-        errorMessage = 'Este email ya está registrado en el sistema';
-      } else if (err.message?.includes('policy')) {
-        errorMessage = 'Error de permisos. Asegúrate de tener RLS configurado correctamente.';
+      // Handle specific error cases
+      if (err.message?.includes('already exists')) {
+        errorMessage = '❌ Este email ya está registrado en el sistema';
+      } else if (err.message?.includes('Unauthorized')) {
+        errorMessage = '❌ No tienes permisos para invitar usuarios. Solo los administradores pueden hacerlo.';
+      } else if (err.message?.includes('Missing required fields')) {
+        errorMessage = '❌ Faltan campos obligatorios. Por favor, completa todos los campos.';
+      } else if (err.message?.includes('Invalid role')) {
+        errorMessage = '❌ Rol inválido. Debe ser "admin" o "member".';
+      } else if (err.message?.includes('FunctionsRelayError') || err.message?.includes('not found')) {
+        errorMessage = '⚠️ La función de invitación no está desplegada en Supabase. Por favor, despliega la Edge Function "invite-user" o usa el método SQL temporal.';
       }
       
       setError(errorMessage);
