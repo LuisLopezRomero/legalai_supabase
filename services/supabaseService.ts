@@ -493,20 +493,44 @@ export const unassignEmail = async (emailId: string): Promise<Email> => {
 };
 
 export const fetchEmailsWithAssignments = async (organizationId: string) => {
-  const { data, error } = await supabase
+  // Fetch emails first
+  const { data: emails, error: emailsError } = await supabase
     .from('emails')
-    .select(`
-      *,
-      assigned_to_user:user_profiles!emails_assigned_to_user_id_fkey(id, full_name, email, role),
-      assigned_by_user:user_profiles!emails_assigned_by_user_id_fkey(id, full_name, email)
-    `)
+    .select('*')
     .eq('organization_id', organizationId)
     .order('received_at', { ascending: false });
   
-  if (error) {
-    console.error('Error fetching emails with assignments:', error);
-    throw error;
+  if (emailsError) {
+    console.error('Error fetching emails:', emailsError);
+    throw emailsError;
   }
   
-  return data || [];
+  if (!emails || emails.length === 0) {
+    return [];
+  }
+  
+  // Fetch all user profiles for this organization
+  const { data: profiles, error: profilesError } = await supabase
+    .from('user_profiles')
+    .select('user_id, id, full_name, email, role')
+    .eq('organization_id', organizationId);
+  
+  if (profilesError) {
+    console.error('Error fetching profiles:', profilesError);
+    // Continue without profiles data
+  }
+  
+  // Map profiles by user_id for quick lookup
+  const profilesMap = new Map(
+    (profiles || []).map(p => [p.user_id, p])
+  );
+  
+  // Combine emails with user profile data
+  const emailsWithAssignments = emails.map(email => ({
+    ...email,
+    assigned_to_user: email.assigned_to_user_id ? profilesMap.get(email.assigned_to_user_id) : null,
+    assigned_by_user: email.assigned_by_user_id ? profilesMap.get(email.assigned_by_user_id) : null,
+  }));
+  
+  return emailsWithAssignments;
 };
